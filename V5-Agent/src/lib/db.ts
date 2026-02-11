@@ -1,7 +1,43 @@
 // In-memory store for mock development
 const mockStore = {
-    scans: [] as any[],
-    findings: [] as any[],
+    scans: [
+        {
+            id: "scan-demo-01",
+            target: "https://example-vulnerable-site.com",
+            status: "COMPLETED",
+            vulnCount: 2,
+            createdAt: new Date(Date.now() - 3600000), // 1 hour ago
+            logs: ["Scan started", "Crawling target...", "Vulnerability found: SQL Injection", "Vulnerability found: XSS", "Scan completed"]
+        },
+        {
+            id: "scan-demo-02",
+            target: "https://defi-protocol-test.org",
+            status: "RUNNING",
+            vulnCount: 0,
+            createdAt: new Date(),
+            logs: ["Scan initialized", "Analyzing smart contracts...", "Checking for reentrancy..."]
+        }
+    ] as any[],
+    findings: [
+        {
+            id: "finding-demo-01",
+            scanId: "scan-demo-01",
+            type: "High",
+            name: "SQL Injection in Login",
+            severity: "HIGH",
+            description: "SQL injection vulnerability detected in the login form parameter 'username'.",
+            createdAt: new Date(Date.now() - 3000000)
+        },
+        {
+            id: "finding-demo-02",
+            scanId: "scan-demo-01",
+            type: "Medium",
+            name: "Reflected XSS",
+            severity: "MEDIUM",
+            description: "Reflected Cross-Site Scripting vulnerability found in search query.",
+            createdAt: new Date(Date.now() - 2800000)
+        }
+    ] as any[],
     users: [] as any[],
     sessions: [] as any[],
 };
