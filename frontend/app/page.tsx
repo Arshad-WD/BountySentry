@@ -61,7 +61,7 @@ export default function Dashboard() {
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
             Authorized Protocol Access
         </div>
-        <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase leading-[0.9] drop-shadow-2xl">
+        <h2 className="text-4xl sm:text-6xl md:text-8xl font-black text-white tracking-tighter uppercase leading-[0.9] drop-shadow-2xl">
           Vulnerability <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x">Discovery</span>
         </h2>
