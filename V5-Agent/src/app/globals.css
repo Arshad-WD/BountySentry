@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --border: #333333;
+  --accent: #3b82f6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter);
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    background-image: none;
+  }
+}
+
+@utility glass-card {
+  background-color: #0c0c0c;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@utility glass-button {
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #eaeaea;
+    border-color: #eaeaea;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@utility primary-button {
+  @apply glass-button;
+}
+
+@utility secondary-button {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: #ffffff;
+  }
+}
+
+@utility gradient-text {
+  color: #ffffff;
+}

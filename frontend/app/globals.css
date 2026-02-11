@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-outfit);
+
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-card: var(--brand-card);
+  --color-brand-text: var(--brand-text);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-border: var(--brand-border);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-glow: var(--brand-accent-glow);
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-mesh: mesh 15s ease infinite;
+}
+
+:root {
+  /* Premium Fintech Theme - Institutional Dark */
+  --brand-bg: #020617;
+  /* Slate 950 */
+  --brand-card: #0f172a;
+  /* Slate 900 */
+  --brand-text: #f8fafc;
+  /* Slate 50 */
+  --brand-muted: #64748b;
+  /* Slate 500 */
+  --brand-border: rgba(255, 255, 255, 0.05);
+  --brand-accent: #818cf8;
+  /* Indigo 400 */
+  --brand-accent-glow: rgba(129, 140, 248, 0.2);
+
+  --background: var(--brand-bg);
+  --foreground: var(--brand-text);
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Institutional Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--brand-text);
+}
+
+/* Advanced Glassmorphism */
+@utility glass-panel {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@utility glass-card {
+  @apply glass-panel rounded-3xl transition-all duration-500;
+
+  &:hover {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5), 0 0 40px -10px var(--brand-accent-glow);
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brand-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-border);
+  border-radius: 10px;
+}
+
+/* Mesh Gradient Background */
+.bg-mesh {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: var(--brand-bg);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.05) 0, transparent 50%);
+  filter: blur(80px);
+}
+
+@keyframes mesh {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.8;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+}
+
+.bg-grid-pattern {
+  background-size: 60px 60px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black, transparent 100%);
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-text via-indigo-200 to-indigo-400;
+}

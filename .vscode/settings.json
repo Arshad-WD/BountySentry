@@ -1,0 +1,21 @@
+{
+    "files.exclude": {
+        "V5-Frontend & Backend": true,
+        "**/.next": true,
+        "**/node_modules": false
+    },
+    "search.exclude": {
+        "V5-Frontend & Backend": true,
+        "**/node_modules": true,
+        "**/.next": true
+    },
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "typescript.tsserver.watchOptions": {
+        "excludeDirectories": [
+            "**/node_modules",
+            "**/.next",
+            "V5-Frontend & Backend"
+        ]
+    },
+    "typescript.tsconfigProxy": "d:/MAJOR PROJECT/V5/V5-Frontend_Backend/frontend/tsconfig.json"
+}

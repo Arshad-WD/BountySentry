@@ -1,0 +1,20 @@
+{
+  "name": "dao-terminal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "ISC",
+  "type": "commonjs",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.ts"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.10",
+    "ethers": "^6.13.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+}

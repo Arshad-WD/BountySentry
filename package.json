@@ -1,0 +1,12 @@
+{
+    "name": "v5-orchestrator",
+    "version": "1.0.0",
+    "description": "Root orchestrator for V5 project",
+    "scripts": {
+        "start": "node start_services.js",
+        "dev": "node start_services.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}
