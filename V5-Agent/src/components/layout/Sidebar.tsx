@@ -19,7 +19,12 @@ import { useState } from "react";
 
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3001";
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ mobileOpen = false, onClose = () => {} }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -44,11 +49,10 @@ export default function Sidebar() {
     { name: "Settings", icon: <SettingsIcon size={18} />, path: "/dashboard/settings" },
   ];
 
-  return (
-    <aside className="fixed left-0 top-0 bottom-0 w-72 bg-black border-r border-white/10 hidden lg:flex flex-col z-50">
-      {/* Brand Section */}
+  const SidebarContent = () => (
+    <>
       <div className="p-8 border-b border-white/5">
-        <Link href="/dashboard" className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3" onClick={onClose}>
           <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center">
             <Shield className="w-5 h-5 text-black" />
           </div>
@@ -56,7 +60,6 @@ export default function Sidebar() {
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-4 py-8 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
@@ -64,6 +67,7 @@ export default function Sidebar() {
             <Link
               key={item.name}
               href={item.path}
+              onClick={onClose}
               className={`flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${
                 isActive 
                   ? "bg-white/10 text-white" 
@@ -76,7 +80,6 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Back to Protocol DAO */}
         <div className="pt-4 mt-4 border-t border-white/5">
           <a
             href={FRONTEND_URL}
@@ -90,7 +93,6 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* Footer Profile Section */}
       <div className="p-6 space-y-4">
         <div className="p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5 relative group overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -99,9 +101,12 @@ export default function Sidebar() {
             <div className="w-10 h-10 h-10 rounded-full border border-blue-500/30 p-0.5 bg-gradient-to-tr from-blue-500 to-indigo-500">
                <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-[10px] font-black italic">OP</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-black tracking-tight">Operator-01</span>
-              <span className="text-[10px] text-slate-500 font-bold">Level 4 Security</span>
+            <div className="flex-1 min-w-0">
+               <p className="text-sm font-bold text-white truncate">Operator</p>
+               <div className="flex items-center gap-1.5 mt-0.5">
+                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                 <p className="text-[10px] font-medium text-emerald-500 uppercase tracking-wider">Active</p>
+               </div>
             </div>
           </div>
         </div>
@@ -109,14 +114,43 @@ export default function Sidebar() {
         <button 
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:text-red-400 hover:bg-red-500/5 transition-all w-full border border-transparent hover:border-red-500/10 group disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all text-xs font-bold uppercase tracking-widest text-slate-400"
         >
-          <LogOut className={`w-4 h-4 group-hover:-translate-x-1 transition-transform ${isSigningOut ? 'animate-pulse' : ''}`} />
-          <span className="font-bold text-xs uppercase tracking-widest leading-none">
-            {isSigningOut ? "Terminating..." : "Terminate Session"}
-          </span>
+           {isSigningOut ? (
+             <span className="animate-pulse">Disconnecting...</span>
+           ) : (
+             <>
+               <LogOut size={14} />
+               <span>Disconnect</span>
+             </>
+           )}
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+        {/* Desktop Sidebar */}
+        <aside className="fixed left-0 top-0 bottom-0 w-72 bg-black border-r border-white/10 hidden lg:flex flex-col z-50">
+            <SidebarContent />
+        </aside>
+
+        {/* Mobile Sidebar Overlay */}
+        {mobileOpen && (
+            <div className="fixed inset-0 z-50 lg:hidden">
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+                <motion.aside 
+                    initial={{ x: "-100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: "-100%" }}
+                    transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+                    className="absolute left-0 top-0 bottom-0 w-72 bg-black border-r border-white/10 flex flex-col"
+                >
+                    <SidebarContent />
+                </motion.aside>
+            </div>
+        )}
+    </>
   );
 }
