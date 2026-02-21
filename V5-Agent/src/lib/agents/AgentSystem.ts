@@ -436,6 +436,38 @@ export async function callLlmIntelligence(prompt: string, config: { provider: st
     return result;
 }
 
+/**
+ * Smart API Key Auto-Detection
+ * Detects the LLM provider from the key format
+ */
+export function detectProviderFromKey(key: string): string | null {
+    if (!key || key.trim().length === 0) return null;
+    const k = key.trim();
+
+    // Anthropic: sk-ant-... (must check before generic sk-)
+    if (k.startsWith("sk-ant-")) return "anthropic";
+
+    // OpenRouter: sk-or-... (must check before generic sk-)
+    if (k.startsWith("sk-or-")) return "openrouter";
+
+    // OpenAI: sk-... or sk-proj-...
+    if (k.startsWith("sk-")) return "openai";
+
+    // Groq: gsk_...
+    if (k.startsWith("gsk_")) return "groq";
+
+    // Ollama: localhost URLs
+    if (k.startsWith("http://localhost") || k.startsWith("http://127.0.0.1")) return "ollama";
+
+    // Google Gemini: starts with AI or is 39+ chars alphanumeric
+    if (k.startsWith("AI") && k.length >= 35) return "google";
+
+    // Mistral: length pattern
+    if (k.length === 32 && /^[a-zA-Z0-9]+$/.test(k)) return "mistral";
+
+    return null; // Unknown — let user select manually
+}
+
 // Low-level execution logic
 async function executeLlmRequest(provider: string, key: string, prompt: string) {
     const systemPrompt = "You are a specialized cybersecurity reasoning agent. Analyze the provided reconnaissance data and return specific security vulnerabilities found. Focus on high-impact, actionable findings.";
@@ -532,6 +564,52 @@ async function executeLlmRequest(provider: string, key: string, prompt: string) 
                 })
             });
             return await res.json();
+        }
+
+        if (provider === "mistral") {
+            const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${key}`
+                },
+                body: JSON.stringify({
+                    model: "mistral-large-latest",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: prompt }
+                    ]
+                })
+            });
+            const data = await res.json();
+            if (data.error) return { error: true, details: data.error };
+            return data;
+        }
+
+        if (provider === "sentinelx" || provider === "shannon") {
+            // SentinelX / Shannon - OpenAI-compatible API for autonomous pentesting
+            // Shannon exposes an OpenAI-compatible endpoint
+            const shannonBase = key.startsWith("http") ? key : "https://api.shannon.ai";
+            const apiKey = key.startsWith("http") ? "" : key;
+
+            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
+            const res = await fetch(`${shannonBase}/v1/chat/completions`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    model: "shannon-security",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.1
+                })
+            });
+            const data = await res.json();
+            if (data.error) return { error: true, details: data.error };
+            return data;
         }
 
     } catch (e) {
