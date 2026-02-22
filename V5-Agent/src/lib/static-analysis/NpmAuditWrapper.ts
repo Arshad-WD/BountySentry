@@ -63,12 +63,12 @@ export class NpmAuditWrapper implements StaticAnalyzer {
     }
 }
 
-function mapNpmSeverity(severity: string): "Low" | "Medium" | "High" | "Critical" {
+function mapNpmSeverity(severity: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
     switch (severity?.toLowerCase()) {
-        case "critical": return "Critical";
-        case "high": return "High";
-        case "moderate": return "Medium";
-        case "low": return "Low";
-        default: return "Medium";
+        case "critical": return "CRITICAL";
+        case "high": return "HIGH";
+        case "moderate": return "MEDIUM";
+        case "low": return "LOW";
+        default: return "MEDIUM";
     }
 }

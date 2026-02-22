@@ -52,12 +52,12 @@ export class BrakemanWrapper implements StaticAnalyzer {
     }
 }
 
-function mapBrakemanSeverity(confidence: string): "Low" | "Medium" | "High" | "Critical" {
+function mapBrakemanSeverity(confidence: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
     switch (confidence?.toLowerCase()) {
-        case "high": return "Critical";
-        case "medium": return "High";
-        case "weak": return "Medium";
-        default: return "Medium";
+        case "high": return "CRITICAL";
+        case "medium": return "HIGH";
+        case "weak": return "MEDIUM";
+        default: return "MEDIUM";
     }
 }
 

@@ -64,12 +64,12 @@ export class NjsscanWrapper implements StaticAnalyzer {
     }
 }
 
-function mapNjsscanSeverity(severity: string): "Low" | "Medium" | "High" | "Critical" {
+function mapNjsscanSeverity(severity: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
     switch (severity?.toUpperCase()) {
-        case "ERROR": return "Critical";
-        case "WARNING": return "High";
-        case "INFO": return "Medium";
-        default: return "Medium";
+        case "ERROR": return "CRITICAL";
+        case "WARNING": return "HIGH";
+        case "INFO": return "MEDIUM";
+        default: return "MEDIUM";
     }
 }
 

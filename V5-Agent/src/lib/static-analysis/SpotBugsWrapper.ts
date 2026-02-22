@@ -80,11 +80,11 @@ export class SpotBugsWrapper implements StaticAnalyzer {
     }
 }
 
-function mapJavaSeverity(priority: number): "Low" | "Medium" | "High" | "Critical" {
-    if (priority <= 1) return "Critical";
-    if (priority <= 2) return "High";
-    if (priority <= 3) return "Medium";
-    return "Low";
+function mapJavaSeverity(priority: number): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
+    if (priority <= 1) return "CRITICAL";
+    if (priority <= 2) return "HIGH";
+    if (priority <= 3) return "MEDIUM";
+    return "LOW";
 }
 
 function mapJavaCategory(rule: string): string {

@@ -65,12 +65,12 @@ export class RetireJsWrapper implements StaticAnalyzer {
     }
 }
 
-function mapRetireSeverity(severity: string): "Low" | "Medium" | "High" | "Critical" {
+function mapRetireSeverity(severity: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
     switch (severity?.toLowerCase()) {
-        case "critical": return "Critical";
-        case "high": return "High";
-        case "medium": return "Medium";
-        case "low": return "Low";
-        default: return "Medium";
+        case "critical": return "CRITICAL";
+        case "high": return "HIGH";
+        case "medium": return "MEDIUM";
+        case "low": return "LOW";
+        default: return "MEDIUM";
     }
 }

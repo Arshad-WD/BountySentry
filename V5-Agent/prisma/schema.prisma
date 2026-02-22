@@ -39,6 +39,7 @@ model Scan {
   status     String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
   scanMode   String    @default("full")    // static, dynamic, full
   scanEngine String    @default("codeql")  // codeql, sentinelx
+  vulnCount  Int       @default(0)
   logs       String[]  @default([])
   findings   Finding[]
   userId     String?

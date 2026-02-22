@@ -62,6 +62,11 @@ function generateHtmlReport(scan: any) {
                         <h3>${index + 1}. ${finding.type}</h3>
                         <span class="severity-badge" style="background: ${sevColor}20; color: ${sevColor}; border: 1px solid ${sevColor}40;">${finding.severity}</span>
                     </div>
+                    <div class="intelligence-tag">
+                        ${finding.id?.startsWith('LLM')
+                    ? `<span class="tag-intel">🧠 LLM Intelligence Engine</span>`
+                    : `<span class="tag-heur">⚡ Deep Heuristic Engine</span>`}
+                    </div>
                     <p class="finding-category">${finding.location || "General"}</p>
                     <div class="finding-section">
                         <h4>Analysis</h4>
@@ -109,6 +114,10 @@ function generateHtmlReport(scan: any) {
         .remediation h4 { color: #22c55e !important; }
         .logs-container { background: #050505; border: 1px solid #1e293b; border-radius: 8px; padding: 20px; margin-top: 40px; }
         .log-entry { font-family: monospace; font-size: 11px; color: #64748b; padding: 3px 0; border-bottom: 1px solid #0f172a; }
+        .intelligence-tag { margin-bottom: 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .tag-intel { color: #a855f7; border: 1px solid #a855f740; padding: 2px 8px; border-radius: 4px; background: #a855f710; }
+        .tag-heur { color: #38bdf8; border: 1px solid #38bdf840; padding: 2px 8px; border-radius: 4px; background: #38bdf810; }
+        .deep-badge { display: inline-block; padding: 4px 12px; background: linear-gradient(90deg, #06b6d4, #3b82f6); color: white; border-radius: 4px; font-size: 10px; font-weight: 900; margin-top: 10px; }
         .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
         .meta-table td { padding: 10px 16px; border-bottom: 1px solid #1e293b; font-size: 13px; }
         .meta-table td:first-child { color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 2px; width: 180px; }
@@ -121,6 +130,7 @@ function generateHtmlReport(scan: any) {
         <div class="header">
             <h1>Sentinel AI</h1>
             <p>Autonomous Security Audit Report</p>
+            ${scan.scanMode === 'full' || scan.scanMode === 'static' ? '<div class="deep-badge">DEEP ANALYSIS ENABLED</div>' : ''}
         </div>
 
         <h2 class="section-title">Executive Summary</h2>

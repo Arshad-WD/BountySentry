@@ -55,7 +55,7 @@ export class PHPStanWrapper implements StaticAnalyzer {
                     category: isSecurityRelevant ? mapPHPCategory(message.message) : "A05:2021-Security Misconfiguration",
                     issue: `PHP Issue: ${message.message?.substring(0, 100) || "Unknown"}`,
                     description: message.message || "Static analysis issue in PHP code.",
-                    severity: isSecurityRelevant ? "High" : "Medium",
+                    severity: isSecurityRelevant ? "HIGH" : "MEDIUM",
                     evidence: `File: ${filePath}:${message.line || "?"}\nTip: ${message.tip || "N/A"}`,
                     remediation: message.tip || "Review PHP code for security best practices.",
                 });

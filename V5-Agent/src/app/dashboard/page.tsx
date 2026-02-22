@@ -72,9 +72,9 @@ export default function Dashboard() {
       setScans(latestScans);
       setStats({
         total: scansData.length || 0,
-        critical: allFindings.filter((f: any) => f.severity === "CRITICAL").length,
-        high: allFindings.filter((f: any) => f.severity === "HIGH").length,
-        medium: allFindings.filter((f: any) => f.severity === "MEDIUM").length,
+        critical: allFindings.filter((f: any) => f.severity?.toUpperCase() === "CRITICAL").length,
+        high: allFindings.filter((f: any) => f.severity?.toUpperCase() === "HIGH").length,
+        medium: allFindings.filter((f: any) => f.severity?.toUpperCase() === "MEDIUM").length,
         resolved: 0
       });
     } catch (e) {

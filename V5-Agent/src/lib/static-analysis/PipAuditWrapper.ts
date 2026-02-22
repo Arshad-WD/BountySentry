@@ -77,8 +77,8 @@ export class PipAuditWrapper implements StaticAnalyzer {
     }
 }
 
-function mapPipSeverity(vulnId: string): "Low" | "Medium" | "High" | "Critical" {
-    // CVEs don't contain severity directly in pip-audit format, default to High
-    if (vulnId?.startsWith("PYSEC")) return "High";
-    return "High";
+function mapPipSeverity(vulnId: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
+    // CVEs don't contain severity directly in pip-audit format, default to HIGH
+    if (vulnId?.startsWith("PYSEC")) return "HIGH";
+    return "HIGH";
 }

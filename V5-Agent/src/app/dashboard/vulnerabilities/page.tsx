@@ -15,7 +15,8 @@ import {
   AlertCircle,
   Flame,
   Bug,
-  Crosshair
+  Crosshair,
+  Clock
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -69,15 +70,16 @@ export default function VulnerabilitiesPage() {
 
   const filteredFindings = findings.filter(f => {
     if (activeFilter === "all") return true;
-    if (activeFilter === "critical") return f.severity === "CRITICAL";
-    if (activeFilter === "high") return f.severity === "HIGH";
-    if (activeFilter === "medium") return f.severity === "MEDIUM";
+    const s = f.severity?.toUpperCase();
+    if (activeFilter === "critical") return s === "CRITICAL";
+    if (activeFilter === "high") return s === "HIGH";
+    if (activeFilter === "medium") return s === "MEDIUM";
     return true;
   });
 
-  const criticalCount = findings.filter(f => f.severity === "CRITICAL").length;
-  const highCount = findings.filter(f => f.severity === "HIGH").length;
-  const mediumCount = findings.filter(f => f.severity === "MEDIUM").length;
+  const criticalCount = findings.filter(f => f.severity?.toUpperCase() === "CRITICAL").length;
+  const highCount = findings.filter(f => f.severity?.toUpperCase() === "HIGH").length;
+  const mediumCount = findings.filter(f => f.severity?.toUpperCase() === "MEDIUM").length;
 
   return (
     <>
@@ -197,60 +199,73 @@ function SeverityStat({ label, value, icon, gradient, iconColor }: any) {
 }
 
 function VulnerabilityCard({ vuln, index }: any) {
-  const severityConfig: Record<string, { color: string; bg: string; border: string; icon: React.ReactNode; barColor: string }> = {
-    CRITICAL: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", icon: <Flame size={16} />, barColor: "bg-red-500" },
-    HIGH: { color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", icon: <AlertTriangle size={16} />, barColor: "bg-orange-500" },
-    MEDIUM: { color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20", icon: <AlertCircle size={16} />, barColor: "bg-yellow-500" },
-    LOW: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/10", icon: <Shield size={16} />, barColor: "bg-blue-500" },
+  const severityConfig: Record<string, { color: string; bg: string; border: string; icon: React.ReactNode; barColor: string; accent: string }> = {
+    CRITICAL: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", icon: <Flame size={16} />, barColor: "bg-red-500", accent: "from-red-500/20 to-transparent" },
+    HIGH: { color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", icon: <AlertTriangle size={16} />, barColor: "bg-orange-500", accent: "from-orange-500/20 to-transparent" },
+    MEDIUM: { color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20", icon: <AlertCircle size={16} />, barColor: "bg-yellow-500", accent: "from-yellow-500/20 to-transparent" },
+    LOW: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/10", icon: <Shield size={16} />, barColor: "bg-blue-500", accent: "from-blue-500/20 to-transparent" },
   };
   const sc = severityConfig[vuln.severity] || severityConfig.MEDIUM;
   const impactLevel = vuln.severity === "CRITICAL" ? 5 : vuln.severity === "HIGH" ? 4 : vuln.severity === "MEDIUM" ? 3 : 2;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
+      transition={{ delay: index * 0.05 }}
     >
       <Link href={`/dashboard/vulnerabilities/${vuln.id}`}>
-        <div className={`relative bg-black border ${sc.border} rounded-2xl p-5 hover:border-white/20 transition-all cursor-pointer group overflow-hidden`}>
-          {/* Severity accent bar */}
-          <div className={`absolute left-0 top-0 bottom-0 w-1 ${sc.barColor} rounded-l-2xl`} />
+        <div className={`relative bg-[#050505] border ${sc.border} rounded-2xl p-6 hover:border-white/20 transition-all cursor-pointer group overflow-hidden`}>
+          {/* Ambient accent overflow */}
+          <div className={`absolute top-0 left-0 w-32 h-32 bg-gradient-to-br ${sc.accent} blur-2xl opacity-40 pointer-events-none`} />
           
-          <div className="flex items-center justify-between pl-4">
-            <div className="flex items-center gap-5 flex-1 min-w-0">
-              <div className={`w-11 h-11 rounded-xl ${sc.bg} flex items-center justify-center shrink-0 ${sc.color}`}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="flex items-start gap-5 flex-1 min-w-0">
+              <div className={`w-12 h-12 rounded-xl ${sc.bg} border ${sc.border} flex items-center justify-center shrink-0 ${sc.color} shadow-[0_0_20px_-5px_rgba(0,0,0,0.5)]`}>
                 {sc.icon}
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-3 mb-1.5">
-                  <h3 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors tracking-tight truncate">{vuln.type}</h3>
-                  <span className={`shrink-0 px-2.5 py-0.5 rounded-full text-[8px] font-black border uppercase tracking-widest ${sc.color} ${sc.bg} ${sc.border}`}>{vuln.severity}</span>
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className="text-base font-black text-white group-hover:text-blue-400 transition-colors tracking-tight truncate leading-tight">{vuln.type}</h3>
+                  <span className={`shrink-0 px-2.5 py-0.5 rounded-md text-[8px] font-black border uppercase tracking-[0.15em] ${sc.color} ${sc.bg} ${sc.border}`}>{vuln.severity}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mb-2 max-w-xl line-clamp-1 font-medium">{vuln.description}</p>
-                <div className="flex items-center gap-3 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-                  <span className="flex items-center gap-1">
-                    <Crosshair size={10} /> {vuln.location || "Unknown"}
+                
+                <p className="text-[11px] text-slate-500 line-clamp-1 font-medium max-w-2xl">{vuln.description}</p>
+                
+                <div className="flex items-center gap-4 text-[9px] font-bold text-slate-600 uppercase tracking-widest pt-1">
+                  <span className="flex items-center gap-1.5">
+                    <Crosshair size={10} className="text-slate-700" /> {vuln.location || "System Root"}
                   </span>
                   {vuln.scan?.url && (
                     <>
-                      <span className="w-1 h-1 rounded-full bg-white/10" />
-                      <span className="truncate max-w-[200px]">{vuln.scan.url}</span>
+                      <div className="w-1 h-1 rounded-full bg-white/5" />
+                      <span className="flex items-center gap-1.5 truncate max-w-[180px]">
+                        <Activity size={10} className="text-slate-700" /> {new URL(vuln.scan.url).hostname}
+                      </span>
                     </>
                   )}
+                  <div className="w-1 h-1 rounded-full bg-white/5" />
+                  <span className="flex items-center gap-1.5">
+                    <Clock size={10} className="text-slate-700" /> {new Date(vuln.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-6 shrink-0 ml-4">
-              <div className="hidden md:flex flex-col items-end">
-                <span className="text-[8px] font-black text-slate-700 uppercase tracking-widest mb-1.5">Impact</span>
-                <div className="flex gap-1">
+
+            <div className="flex items-center gap-8 shrink-0 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-8">
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-[7px] font-black text-slate-700 uppercase tracking-[0.2em]">Impact Level</div>
+                <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className={`w-4 h-1 rounded-full transition-colors ${i <= impactLevel ? sc.barColor : "bg-white/5"}`} />
+                    <div key={i} className={`w-3.5 h-1.5 rounded-full transition-all duration-500 ${i <= impactLevel ? sc.barColor : "bg-white/[0.03]"}`} 
+                      style={{ opacity: i <= impactLevel ? 1 : 0.4 }}
+                    />
                   ))}
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-700 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+              <div className="w-8 h-8 rounded-full bg-white/[0.03] flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                <ArrowRight size={14} className="text-slate-700 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+              </div>
             </div>
           </div>
         </div>
@@ -258,3 +273,4 @@ function VulnerabilityCard({ vuln, index }: any) {
     </motion.div>
   );
 }
+

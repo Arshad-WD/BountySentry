@@ -1,46 +1,44 @@
-// In-memory store for mock development
-const mockStore = {
-    scans: [
-        {
-            id: "scan-demo-01",
-            target: "https://example-vulnerable-site.com",
-            status: "COMPLETED",
-            vulnCount: 2,
-            createdAt: new Date(Date.now() - 3600000), // 1 hour ago
-            logs: ["Scan started", "Crawling target...", "Vulnerability found: SQL Injection", "Vulnerability found: XSS", "Scan completed"]
-        },
-        {
-            id: "scan-demo-02",
-            target: "https://defi-protocol-test.org",
-            status: "RUNNING",
-            vulnCount: 0,
-            createdAt: new Date(),
-            logs: ["Scan initialized", "Analyzing smart contracts...", "Checking for reentrancy..."]
-        }
-    ] as any[],
-    findings: [
-        {
-            id: "finding-demo-01",
-            scanId: "scan-demo-01",
-            type: "High",
-            name: "SQL Injection in Login",
-            severity: "HIGH",
-            description: "SQL injection vulnerability detected in the login form parameter 'username'.",
-            createdAt: new Date(Date.now() - 3000000)
-        },
-        {
-            id: "finding-demo-02",
-            scanId: "scan-demo-01",
-            type: "Medium",
-            name: "Reflected XSS",
-            severity: "MEDIUM",
-            description: "Reflected Cross-Site Scripting vulnerability found in search query.",
-            createdAt: new Date(Date.now() - 2800000)
-        }
-    ] as any[],
+import path from 'path';
+const mockStoreFile = path.resolve(process.cwd() || ".", "prisma/mock_db.json");
+
+// Initialize store from file if it exists
+let mockStore = {
+    scans: [] as any[],
+    findings: [] as any[],
     users: [] as any[],
     sessions: [] as any[],
+    vulnCount: 0,
 };
+
+try {
+    const fs = require('fs');
+    if (fs.existsSync(mockStoreFile)) {
+        mockStore = JSON.parse(fs.readFileSync(mockStoreFile, 'utf-8'));
+    } else {
+        // Initial demo data if no file exists
+        mockStore.scans = [
+            {
+                id: "scan-demo-01",
+                url: "https://example-vulnerable-site.com",
+                status: "COMPLETED",
+                vulnCount: 2,
+                createdAt: new Date(Date.now() - 3600000),
+                logs: ["Scan started", "Crawling target...", "Vulnerability found: SQL Injection", "Vulnerability found: XSS", "Scan completed"]
+            }
+        ];
+    }
+} catch (e) {
+    console.warn("Failed to load mock store file, using in-memory store.");
+}
+
+function persistStore() {
+    try {
+        const fs = require('fs');
+        fs.writeFileSync(mockStoreFile, JSON.stringify(mockStore, null, 2));
+    } catch (e) {
+        console.error("Failed to persist mock store:", e);
+    }
+}
 
 // Helper to generate realistic IDs (UUID-like format without "mock-" prefix)
 function generateId(prefix: string = ''): string {
@@ -91,9 +89,11 @@ const mockPrisma = {
                 ...data.data,
                 status: "RUNNING",
                 logs: ["Initializing Agent Mission..."],
+                vulnCount: 0,
                 createdAt: new Date(),
             };
             mockStore.scans.push(newItem);
+            persistStore();
             return newItem;
         },
         findMany: async (args?: any) => {
@@ -129,6 +129,7 @@ const mockPrisma = {
                     args.data.logs = [...currentLogs, ...args.data.logs];
                 }
                 mockStore.scans[index] = { ...mockStore.scans[index], ...args.data };
+                persistStore();
                 return mockStore.scans[index];
             }
             return { ...args.data, id: args.where.id };
@@ -140,6 +141,7 @@ const mockPrisma = {
                 mockStore.scans.splice(index, 1);
                 // Also delete associated findings
                 mockStore.findings = mockStore.findings.filter(f => f.scanId !== deleted.id);
+                persistStore();
                 return deleted;
             }
             return null;
@@ -261,11 +263,23 @@ const mockPrisma = {
 let prisma: any;
 
 try {
-    // Dynamically attempt to import Prisma to avoid build errors if it's missing
-    const { PrismaClient } = require("@prisma/client");
-    prisma = new PrismaClient();
-} catch (e) {
-    console.warn("Prisma client failed to initialize, using mock client.");
+    // Check if we are in a browser or server environment
+    if (typeof window === 'undefined') {
+        const { PrismaClient } = require("@prisma/client");
+
+        // Standard initialization for Prisma 6
+        prisma = new PrismaClient();
+
+        // Force a basic check to ensure client is usable
+        prisma.$connect().catch((e: any) => {
+            console.error("Prisma failed to connect to database:", e.message);
+            prisma = mockPrisma;
+        });
+    } else {
+        prisma = mockPrisma;
+    }
+} catch (e: any) {
+    console.warn("Prisma client failed to initialize:", e.message);
     prisma = mockPrisma;
 }
 

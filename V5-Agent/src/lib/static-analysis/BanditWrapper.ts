@@ -47,12 +47,12 @@ export class BanditWrapper implements StaticAnalyzer {
     }
 }
 
-function mapBanditSeverity(severity: string): "Low" | "Medium" | "High" | "Critical" {
+function mapBanditSeverity(severity: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
     switch (severity?.toUpperCase()) {
-        case "HIGH": return "High";
-        case "MEDIUM": return "Medium";
-        case "LOW": return "Low";
-        default: return "Medium";
+        case "HIGH": return "HIGH";
+        case "MEDIUM": return "MEDIUM";
+        case "LOW": return "LOW";
+        default: return "MEDIUM";
     }
 }
 
