@@ -31,6 +31,8 @@ export default function SubmitReport() {
   const [dragActive, setDragActive] = useState(false);
   const [formData, setFormData] = useState({
     summary: "",
+    fileType: "",
+    fileName: "",
   });
 
   // Fetch bounties from blockchain
@@ -57,6 +59,11 @@ export default function SubmitReport() {
   // Handle file upload
   const handleFileChange = async (selectedFile: File) => {
     setFile(selectedFile);
+    setFormData(prev => ({ 
+        ...prev, 
+        fileName: selectedFile.name, 
+        fileType: selectedFile.type 
+    }));
     
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -71,7 +78,17 @@ export default function SubmitReport() {
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
       setFileHash(hashHex);
     };
-    reader.readAsText(selectedFile);
+
+    // Use readAsDataURL for binary/unknown files, readAsText for clear text files
+    const isText = selectedFile.type.startsWith("text/") || 
+                   selectedFile.name.endsWith(".md") || 
+                   selectedFile.name.endsWith(".txt");
+    
+    if (isText) {
+        reader.readAsText(selectedFile);
+    } else {
+        reader.readAsDataURL(selectedFile);
+    }
   };
 
   // Drag and drop handlers
@@ -101,8 +118,8 @@ export default function SubmitReport() {
         addToast("Please connect your wallet first.", "warning");
         return;
     }
-    if (!fileHash) {
-        addToast("Please upload a report document.", "warning");
+    if (!formData.summary) {
+        addToast("Please provide a technical summary.", "warning");
         return;
     }
     if (!selectedBounty) {
@@ -112,15 +129,31 @@ export default function SubmitReport() {
     
     setLoading(true);
     try {
+      let finalHash = fileHash;
+      let finalContent = fileContent;
+
+      // If no file, generate hash from summary
+      if (!finalHash) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(formData.summary);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          finalHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+          finalContent = "Technical Summary Only";
+      }
+
       // Store content in MockIPFS
       const ipfsData = JSON.stringify({
         summary: formData.summary,
-        fileContent: fileContent
+        fileContent: finalContent,
+        hasFile: !!file,
+        fileType: formData.fileType,
+        fileName: formData.fileName
       });
-      MockIPFS.save(fileHash, ipfsData);
+      MockIPFS.save(finalHash, ipfsData);
       
       // Submit to blockchain
-      const tx = await submitReport(signer, Number(selectedBounty.id), fileHash);
+      const tx = await submitReport(signer, Number(selectedBounty.id), finalHash);
       const receipt = await tx.wait();
       
       // Extract report ID from event (ReportSubmitted)
@@ -318,7 +351,7 @@ export default function SubmitReport() {
             <div className="space-y-8">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  Upload Evidence
+                  Upload Evidence (Optional)
                 </label>
                 <div
                   onDragEnter={handleDrag}
@@ -439,7 +472,7 @@ export default function SubmitReport() {
                 type="submit"
                 className="px-16 py-6 text-xs tracking-[0.3em] font-black uppercase shadow-2xl"
                 loading={loading}
-                disabled={!file || !fileHash}
+                disabled={!formData.summary}
               >
                 {loading ? "Submitting Report..." : "Submit Report On-Chain"}
               </Button>

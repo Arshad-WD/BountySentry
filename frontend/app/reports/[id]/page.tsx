@@ -15,15 +15,15 @@ import { useToast } from "@/app/context/ToastContext";
 export default function ReportDetails() {
   const { addToast } = useToast();
   const { id } = useParams();
-  const { signer, provider, isConnected, connect } = useWeb3();
+  const { signer, provider, isConnected, connect, address } = useWeb3();
   const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchReport = async () => {
         if (!provider || !id) return;
         try {
-            const data = await getReport(provider, Number(id));
+            const data: any = await getReport(provider, Number(id));
             
             // Try to fetch real content from MockIPFS
             const rawContent = MockIPFS.get(data.ipfsHash);
@@ -32,6 +32,9 @@ export default function ReportDetails() {
                   const parsed = JSON.parse(rawContent);
                   data.details = parsed.fileContent;
                   data.summary = parsed.summary;
+                  data.fileType = parsed.fileType;
+                  data.fileName = parsed.fileName;
+                  data.hasFile = parsed.hasFile;
                 } catch {
                   data.details = rawContent;
                 }
@@ -110,8 +113,34 @@ export default function ReportDetails() {
 
           <section className="space-y-4">
             <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Technical Findings</h3>
-            <Card className="p-8 bg-black/40 border-white/5 font-mono text-xs leading-relaxed text-brand-muted min-h-[200px] whitespace-pre-wrap">
-              {report.details}
+            <Card className="p-8 bg-black/40 border-white/5 font-mono text-xs leading-relaxed text-brand-muted min-h-[200px] whitespace-pre-wrap overflow-hidden">
+              {report.fileType && report.fileType.startsWith("image/") ? (
+                <div className="space-y-4">
+                  <img src={report.details} alt="Evidence" className="max-w-full rounded-lg border border-white/10" />
+                  <p className="text-[10px] uppercase tracking-widest text-brand-secondary">Image Evidence: {report.fileName}</p>
+                </div>
+              ) : report.fileType === "application/pdf" ? (
+                <div className="flex flex-col items-center justify-center py-10 gap-6">
+                  <div className="w-16 h-16 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent">
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-white mb-1">{report.fileName}</p>
+                    <p className="text-[10px] text-brand-muted uppercase tracking-widest">Portable Document Format</p>
+                  </div>
+                  <a 
+                    href={report.details} 
+                    download={report.fileName}
+                    className="px-6 py-3 rounded-full bg-brand-accent text-brand-bg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform"
+                  >
+                    Download PDF Evidence
+                  </a>
+                </div>
+              ) : (
+                report.details
+              )}
             </Card>
           </section>
 
@@ -137,6 +166,11 @@ export default function ReportDetails() {
                 <Button onClick={connect} className="w-full py-4 text-[10px] tracking-[0.3em] font-black uppercase">
                   Authorize Access
                 </Button>
+              ) : address?.toLowerCase() === report.reporter.toLowerCase() ? (
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center">
+                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Self-Validation Guard</p>
+                    <p className="text-[9px] text-amber-500/80 font-bold mt-1">Reporters cannot validate their own findings.</p>
+                </div>
               ) : (
                 <>
                   <Button onClick={() => handleVote(true)} loading={loading} className="w-full py-4 text-[10px] tracking-[0.3em] font-black uppercase bg-emerald-600 hover:bg-emerald-700 border-emerald-600">

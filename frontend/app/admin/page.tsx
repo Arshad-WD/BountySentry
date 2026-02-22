@@ -16,7 +16,7 @@ import { useToast } from "@/app/context/ToastContext";
 
 export default function CouncilConsole() {
   const { addToast } = useToast();
-  const { signer, provider, isConnected, connect, isCorrectNetwork } = useWeb3();
+  const { signer, provider, isConnected, connect, isCorrectNetwork, address } = useWeb3();
   const [loading, setLoading] = useState(false);
   const [reportId, setReportId] = useState("");
   const [gasComp, setGasComp] = useState("0.05");
@@ -143,6 +143,11 @@ export default function CouncilConsole() {
               </div>
               {!isConnected ? (
                 <Button onClick={connect} className="px-10 py-5 shadow-2xl">Authorize Admin</Button>
+              ) : address?.toLowerCase() === pendingReports.find(r => r.id.toString() === reportId)?.reporter.toLowerCase() ? (
+                <div className="text-right">
+                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Self-Finalization Guard</p>
+                    <p className="text-[9px] text-amber-500/60 font-medium">Reporters cannot finalize their own findings.</p>
+                </div>
               ) : (
                 <Button onClick={handleFinalize} loading={loading} className="px-10 py-5 shadow-2xl">
                   Execute Settlement
