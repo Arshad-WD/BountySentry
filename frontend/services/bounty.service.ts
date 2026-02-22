@@ -31,7 +31,7 @@ export async function createBounty(
     console.log("Transaction confirmed:", receipt.hash);
 
     // Store metadata in MockIPFS (in production, use real IPFS)
-    MockIPFS.save(`bounty-${bountyCountVal}`, JSON.stringify({ projectName, description }));
+    await MockIPFS.save(`bounty-${bountyCountVal}`, JSON.stringify({ projectName, description }));
 
     return { tx, receipt, bountyId: Number(bountyCountVal) };
 }
@@ -71,7 +71,7 @@ export async function getBounties(provider: any) {
             let description = "";
 
             try {
-                const metadata = MockIPFS.get(`bounty-${i}`);
+                const metadata = await MockIPFS.get(`bounty-${i}`);
                 if (metadata) {
                     const parsed = JSON.parse(metadata);
                     projectName = parsed.projectName || projectName;
@@ -107,7 +107,7 @@ export async function getBounty(provider: any, bountyId: number) {
     let description = "This authorized security challenge is governed by the V5 Decentralized DAO.";
 
     try {
-        const metadata = MockIPFS.get(`bounty-${bountyId}`);
+        const metadata = await MockIPFS.get(`bounty-${bountyId}`);
         if (metadata) {
             const parsed = JSON.parse(metadata);
             projectName = parsed.projectName || projectName;

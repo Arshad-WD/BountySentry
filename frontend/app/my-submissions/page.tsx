@@ -21,8 +21,8 @@ export default function MySubmissions() {
             const data = await getMyReports(provider, address);
             
             // Enrich with MockIPFS data
-            const enriched = data.map(report => {
-              const rawContent = MockIPFS.get(report.ipfsHash);
+            const enriched = await Promise.all(data.map(async (report) => {
+              const rawContent = await MockIPFS.get(report.ipfsHash);
               if (rawContent) {
                 try {
                   const parsed = JSON.parse(rawContent);
@@ -32,7 +32,7 @@ export default function MySubmissions() {
                 }
               }
               return report;
-            });
+            }));
             
             setReports(enriched);
         } catch (err) {
