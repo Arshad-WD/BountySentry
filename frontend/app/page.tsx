@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import StatCard from "@/app/components/StatCard";
 import ActionCard from "@/app/components/ActionCard";
+import Button from "@/app/components/Button";
+import Card from "@/app/components/Card";
 import { StatSkeleton } from "@/app/components/Skeleton";
 import SentinelBanner from "@/app/components/SentinelBanner";
 import { useWeb3 } from "@/app/context/Web3Context";
@@ -56,17 +58,20 @@ export default function Dashboard() {
   return (
     <div className="space-y-20 animate-in fade-in duration-1000 bg-grid-pattern min-h-screen pb-20">
       {/* Hero Section */}
-      <div className="text-center max-w-4xl mx-auto space-y-8 pt-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/5 backdrop-blur-md text-[10px] font-bold text-indigo-400 uppercase tracking-[0.3em] mb-4 animate-float">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            Authorized Protocol Access
+      <div className="relative text-center max-w-4xl mx-auto space-y-8 pt-20">
+        {/* Decorative Core */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-accent/5 rounded-full blur-[120px] -z-10 animate-pulse-glow" />
+        
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-accent/20 bg-brand-accent/5 backdrop-blur-md text-[10px] font-bold text-brand-accent uppercase tracking-[0.3em] mb-4 animate-float">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse" />
+            V5 Protocol Active
         </div>
-        <h2 className="text-4xl sm:text-6xl md:text-8xl font-black text-white tracking-tighter uppercase leading-[0.9] drop-shadow-2xl">
-          Vulnerability <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x">Discovery</span>
+        <h2 className="text-5xl sm:text-7xl md:text-9xl font-black text-brand-text tracking-tighter uppercase leading-[0.85] drop-shadow-2xl">
+          Sentinel <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent via-indigo-500 to-brand-accent animate-gradient-x">Evolution</span>
         </h2>
-        <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium">
-          A decentralized bug bounty platform for organizations to secure critical infrastructure and for researchers to earn institutional rewards.
+        <p className="text-xl text-brand-muted leading-relaxed max-w-2xl mx-auto font-medium">
+          The first decentralized security engine utilizing recursive on-chain consensus to protect the future of DeFi.
         </p>
       </div>
 
@@ -75,30 +80,93 @@ export default function Dashboard() {
         <SentinelBanner />
       </div>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-        {!metrics ? (
-            <>
-                <StatSkeleton />
-                <StatSkeleton />
-                <StatSkeleton />
-            </>
-        ) : (
-            <>
-                <StatCard label="Platform Rewards" value={metrics.rewards} subValue={metrics.rewardsUsd} />
-                <StatCard label="Resolved Reports" value={metrics.resolved} />
-                <StatCard label="Active Validators" value={metrics.validators} />
-            </>
-        )}
+      {/* Metrics & Activity */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!metrics ? (
+              <>
+                  <StatSkeleton />
+                  <StatSkeleton />
+                  <StatSkeleton />
+              </>
+          ) : (
+              <>
+                  <StatCard label="Platform Rewards" value={metrics.rewards} subValue={metrics.rewardsUsd} />
+                  <StatCard label="Resolved Reports" value={metrics.resolved} />
+                  <StatCard 
+                    label="Active Validators" 
+                    value={metrics.validators} 
+                    className="md:col-span-2"
+                  />
+              </>
+          )}
+        </div>
+
+        {/* Live Delta */}
+        <Card className="p-10 border-brand-accent/20 bg-brand-accent/[0.01] flex flex-col justify-between">
+           <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                 <h3 className="text-[10px] font-black text-brand-accent uppercase tracking-[0.4em]">Protocol Delta</h3>
+                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <div className="space-y-4">
+                 {[1, 2, 3].map((i) => (
+                    <div key={i} className="group cursor-pointer">
+                       <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] font-mono text-brand-muted uppercase">Event_Seq_{i}42</span>
+                          <span className="text-[8px] font-black text-emerald-500 uppercase px-1.5 py-0.5 bg-emerald-500/10 rounded">Verified</span>
+                       </div>
+                       <p className="text-xs font-bold text-brand-text group-hover:text-brand-accent transition-colors">Vulnerability Settlement Engine Processed</p>
+                    </div>
+                 ))}
+              </div>
+           </div>
+           <Button variant="secondary" className="mt-10 py-4 text-[9px]">Connect Uplink</Button>
+        </Card>
+      </div>
+
+      {/* Protocol Pipeline */}
+      <div className="max-w-6xl mx-auto space-y-12">
+        <div className="flex items-center gap-6">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-muted whitespace-nowrap">
+            Security Pipeline
+          </h3>
+          <div className="h-px w-full bg-gradient-to-r from-brand-border to-transparent" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+          {/* Connecting Line (Desktop) */}
+          <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-brand-accent/20 via-brand-accent/20 to-transparent -z-10 hidden md:block" />
+          
+          {[
+            { step: "01", title: "Protocol Staking", desc: "Organizations lock bounty collateral in the immutable V5 Vault." },
+            { step: "02", title: "Proof Submission", desc: "Security researchers submit cryptographically hashed reports." },
+            { step: "03", title: "Consensus Cycle", desc: "Distributed validators reach agreement on vulnerability validity." },
+            { step: "04", title: "Reward Trigger", desc: "On-chain settlement engine automates bounty distribution." },
+          ].map((item, i) => (
+            <Card key={i} className="p-10 bg-brand-card/30 border-brand-border relative group hover:border-brand-accent transition-all duration-500 hover:-translate-y-2">
+               <div className="text-5xl font-black text-brand-accent/5 absolute -top-2 -right-2 italic group-hover:text-brand-accent transition-colors duration-700">
+                 {item.step}
+               </div>
+               <div className="space-y-4">
+                 <div className="h-10 w-10 rounded-xl bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent shadow-lg group-hover:scale-110 transition-transform">
+                    {i + 1}
+                 </div>
+                 <h4 className="text-sm font-black text-brand-text uppercase tracking-tight">{item.title}</h4>
+                 <p className="text-[10px] text-brand-muted font-bold leading-relaxed">{item.desc}</p>
+               </div>
+            </Card>
+          ))}
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="space-y-8 max-w-6xl mx-auto pb-40">
         <div className="flex items-center gap-6">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 whitespace-nowrap">
-            Operational Workflows
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-muted whitespace-nowrap">
+            Operational Uplink
           </h3>
-          <div className="h-px w-full bg-gradient-to-r from-white/10 to-transparent" />
+          <div className="h-px w-full bg-gradient-to-r from-brand-border to-transparent" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -124,32 +192,13 @@ export default function Dashboard() {
             icon={<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>}
           />
           
-          {/* External Action Card - Manually styled to match ActionCard */}
-          <a href={AGENT_URL} target="_blank" rel="noopener noreferrer" className="group block h-full">
-            <div className="glass-card h-full relative overflow-hidden group-hover:border-indigo-500/50 transition-all duration-500 p-0">
-               <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-               
-               <div className="relative z-10 p-10 flex flex-col items-center text-center h-full">
-                 <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white group-hover:shadow-[0_0_20px_-5px_var(--brand-accent)] transition-all duration-500 mb-6">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                    </svg>
-                 </div>
-                 
-                 <h3 className="text-xl font-bold text-white mb-3">AI Scanner</h3>
-                 <p className="text-sm text-slate-400 mb-8 leading-relaxed max-w-[240px] group-hover:text-white/80 transition-colors">
-                   Launch autonomous security scans on any target.
-                 </p>
-                 
-                 <div className="mt-auto flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-indigo-400 group-hover:text-white transition-all pb-1 border-b border-transparent group-hover:border-white/30">
-                   Launch Sentinel
-                   <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                   </svg>
-                 </div>
-               </div>
-            </div>
-          </a>
+          <ActionCard 
+            title="Council Console" 
+            description="Protocol guardians manage settlements and cross-chain reward orchestration." 
+            href="/admin" 
+            cta="Access Console"
+            icon={<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
+          />
         </div>
       </div>
     </div>

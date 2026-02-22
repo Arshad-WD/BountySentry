@@ -18,12 +18,27 @@ export function isUserRejected(err: any): boolean {
         reason.includes("denied");
 }
 
-export function handleTxError(err: any, fallbackMessage: string = "Transaction failed") {
+export type AddToastFn = (message: string, type?: "success" | "error" | "warning" | "info") => void;
+
+export function handleTxError(err: any, fallbackMessage: string = "Transaction failed", addToast?: AddToastFn) {
     console.error("Transaction Error:", err);
+
+    let message = fallbackMessage;
+    let type: "error" | "warning" = "error";
+
     if (isUserRejected(err)) {
-        alert("Transaction Cancelled: You rejected the request in your wallet.");
+        message = "Transaction Cancelled: You rejected the request in your wallet.";
+        type = "warning";
     } else {
-        const message = err.reason || err.message || fallbackMessage;
-        alert(`${fallbackMessage}: ${message}`);
+        message = `${fallbackMessage}: ${err.reason || err.message || "Unknown error"}`;
     }
+
+    if (addToast) {
+        addToast(message, type);
+    } else {
+        // Fallback for non-React contexts or when hook is not available
+        alert(message);
+    }
+
+    return message;
 }

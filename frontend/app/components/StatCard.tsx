@@ -17,10 +17,10 @@ export default function StatCard({ label, value, subValue, className }: StatCard
       </div>
       
       <div className="relative z-10 space-y-2">
-        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{label}</p>
+        <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">{label}</p>
         <div className="flex flex-col">
-            <p className="text-4xl font-black text-white tracking-tighter uppercase italic">{value}</p>
-            {subValue && <p className="text-xs font-bold text-brand-accent/60 tracking-widest uppercase">{subValue}</p>}
+            <p className="text-4xl font-black text-brand-text tracking-tighter uppercase italic">{value}</p>
+            {subValue && <p className="text-xs font-bold text-brand-accent tracking-widest uppercase">{subValue}</p>}
         </div>
       </div>
     </Card>

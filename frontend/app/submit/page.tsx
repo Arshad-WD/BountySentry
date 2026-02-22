@@ -12,8 +12,11 @@ import { MockIPFS } from "@/lib/storage";
 import { Currency } from "@/lib/currency";
 import { CardSkeleton } from "@/app/components/Skeleton";
 
+import { useToast } from "@/app/context/ToastContext";
+
 export default function SubmitReport() {
-  const { signer, provider, isConnected, connect } = useWeb3();
+  const { addToast } = useToast();
+  const { signer, provider, isConnected, connect, isCorrectNetwork, switchNetwork } = useWeb3();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -33,7 +36,12 @@ export default function SubmitReport() {
   // Fetch bounties from blockchain
   useEffect(() => {
     const fetchBounties = async () => {
-      if (!provider) return;
+      if (!provider || !isCorrectNetwork) {
+          if (isConnected && !isCorrectNetwork) {
+              setBounties([]);
+          }
+          return;
+      }
       try {
         const data = await getBounties(provider);
         console.log("Fetched bounties from blockchain:", data);
@@ -44,7 +52,7 @@ export default function SubmitReport() {
       }
     };
     fetchBounties();
-  }, [provider]);
+  }, [provider, isCorrectNetwork, isConnected]);
 
   // Handle file upload
   const handleFileChange = async (selectedFile: File) => {
@@ -89,9 +97,18 @@ export default function SubmitReport() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signer) return alert("Please connect your wallet first.");
-    if (!fileHash) return alert("Please upload a report document.");
-    if (!selectedBounty) return alert("Please select a target bounty.");
+    if (!signer) {
+        addToast("Please connect your wallet first.", "warning");
+        return;
+    }
+    if (!fileHash) {
+        addToast("Please upload a report document.", "warning");
+        return;
+    }
+    if (!selectedBounty) {
+        addToast("Please select a target bounty.", "warning");
+        return;
+    }
     
     setLoading(true);
     try {
@@ -106,13 +123,24 @@ export default function SubmitReport() {
       const tx = await submitReport(signer, Number(selectedBounty.id), fileHash);
       const receipt = await tx.wait();
       
-      // Extract report ID from event (assuming it's emitted)
-      // For now, we'll use a placeholder
-      const reportId = 0; // This should be extracted from the event
+      // Extract report ID from event (ReportSubmitted)
+      // The event is: ReportSubmitted(uint256 indexed reportId, uint256 indexed bountyId, address reporter, string ipfsHash)
+      // reportId is the 1st parameter (index 0)
+      let reportId = 0;
+      try {
+        const event = receipt?.logs.find((log: any) => log.fragment?.name === "ReportSubmitted");
+        if (event) {
+            reportId = Number(event.args[0]);
+        }
+      } catch (e) {
+        console.error("Failed to extract report ID from receipt", e);
+      }
+      
       setNewReportId(reportId);
+      addToast("Report submitted successfully!", "success");
       setSuccess(true);
     } catch (err: any) {
-      handleTxError(err, "Report submission failed");
+      handleTxError(err, "Report submission failed", addToast);
     } finally {
       setLoading(false);
     }
@@ -178,7 +206,25 @@ export default function SubmitReport() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto pt-10 pb-20">
+    <div className="max-w-5xl mx-auto pt-10 pb-20 relative">
+      {!isConnected && (
+         <div className="absolute inset-0 z-50 bg-brand-bg/60 backdrop-blur-md flex items-center justify-center p-8 rounded-[3rem]">
+            <Card className="max-w-md w-full p-12 text-center space-y-8 border-brand-accent/20 bg-brand-accent/[0.02] shadow-2xl">
+              <div className="w-20 h-20 mx-auto rounded-full bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent shadow-2xl shadow-brand-accent/20">
+                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight italic">Secure Uplink Required</h3>
+                <p className="text-[10px] text-brand-secondary font-bold uppercase tracking-[0.2em] leading-relaxed">
+                  Cryptographic verification is required to submit vulnerabilities. Please connect your protocol wallet.
+                </p>
+              </div>
+              <Button onClick={connect} className="w-full py-5 text-xs font-black uppercase tracking-[0.3em] shadow-2xl">Initialize Secure Link</Button>
+            </Card>
+         </div>
+      )}
       {/* Header */}
       <div className="text-center mb-16 space-y-6">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-[10px] font-black text-emerald-500 uppercase tracking-widest border border-emerald-500/20">
@@ -383,6 +429,10 @@ export default function SubmitReport() {
             {!isConnected ? (
               <Button onClick={connect} type="button" className="px-16 py-6 text-xs tracking-[0.3em] font-black uppercase shadow-2xl">
                 Connect Wallet
+              </Button>
+            ) : !isCorrectNetwork ? (
+              <Button onClick={switchNetwork} type="button" variant="danger" className="px-16 py-6 text-xs tracking-[0.3em] font-black uppercase shadow-2xl">
+                Switch to Local Network
               </Button>
             ) : (
               <Button

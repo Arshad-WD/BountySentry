@@ -18,22 +18,39 @@
 }
 
 :root {
-  /* Premium Fintech Theme - Institutional Dark */
+  /* Institutional Dark - Default */
   --brand-bg: #020617;
-  /* Slate 950 */
   --brand-card: #0f172a;
-  /* Slate 900 */
   --brand-text: #f8fafc;
-  /* Slate 50 */
   --brand-muted: #64748b;
-  /* Slate 500 */
   --brand-border: rgba(255, 255, 255, 0.05);
   --brand-accent: #818cf8;
-  /* Indigo 400 */
   --brand-accent-glow: rgba(129, 140, 248, 0.2);
+  --brand-nav: rgba(2, 6, 23, 0.8);
 
   --background: var(--brand-bg);
   --foreground: var(--brand-text);
+  --selection: rgba(129, 140, 248, 0.3);
+}
+
+:root[data-theme='light'] {
+  /* Premium Fintech Light Theme - High Contrast */
+  --brand-bg: #f8fafc;
+  --brand-card: #ffffff;
+  --brand-text: #020617;
+  /* Darker Slate for high contrast */
+  --brand-muted: #475569;
+  /* Slate 600 */
+  --brand-border: rgba(15, 23, 42, 0.12);
+  --brand-accent: #6366f1;
+  /* More vibrant Indigo */
+  --brand-accent-glow: rgba(99, 102, 241, 0.15);
+  /* Stronger glow */
+  --brand-nav: rgba(255, 255, 255, 0.85);
+
+  --background: var(--brand-bg);
+  --foreground: var(--brand-text);
+  --selection: rgba(99, 102, 241, 0.2);
 }
 
 html,
@@ -61,20 +78,28 @@ h6 {
 
 /* Advanced Glassmorphism */
 @utility glass-panel {
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--brand-card);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--brand-border);
 }
 
 @utility glass-card {
   @apply glass-panel rounded-3xl transition-all duration-500;
 
   &:hover {
-    border-color: rgba(129, 140, 248, 0.4);
-    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5), 0 0 40px -10px var(--brand-accent-glow);
+    border-color: var(--brand-accent);
+    box-shadow:
+      0 20px 40px -20px rgba(0, 0, 0, 0.15),
+      0 0 40px -10px var(--brand-accent-glow);
     transform: translateY(-4px) scale(1.01);
   }
+}
+
+:root[data-theme='light'] .glass-card:hover {
+  box-shadow:
+    0 20px 40px -20px rgba(99, 102, 241, 0.2),
+    0 4px 20px -5px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom Scrollbar */
@@ -87,8 +112,9 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--brand-border);
+  background: var(--brand-muted);
   border-radius: 10px;
+  opacity: 0.3;
 }
 
 /* Mesh Gradient Background */
@@ -101,10 +127,24 @@ h6 {
   z-index: -1;
   background-color: var(--brand-bg);
   background-image:
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
-    radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.05) 0, transparent 50%);
+    radial-gradient(at 0% 0%, var(--brand-accent-glow) 0, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.05) 0, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.03) 0, transparent 50%);
   filter: blur(80px);
+}
+
+:root[data-theme='light'] .bg-mesh {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(244, 114, 182, 0.12) 0, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0, transparent 50%);
+}
+
+.bg-grid-pattern {
+  background-size: 60px 60px;
+  background-image: linear-gradient(to right, var(--brand-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--brand-border) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black, transparent 100%);
 }
 
 @keyframes mesh {

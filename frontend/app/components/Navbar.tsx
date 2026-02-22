@@ -4,32 +4,46 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import WalletButton from "./WalletButton";
+import ThemeToggle from "./ThemeToggle";
 import { useState, useEffect } from "react";
 
 const AGENT_URL = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3000";
 
 const navLinks = [
-  { href: "/", label: "Work" },
+  { href: "/", label: "Core" },
   { href: "/bounties", label: "Bounties" },
-  { href: "/submit", label: "Submit" },
-  { href: "/my-submissions", label: "My Submissions" },
-  { href: "/reports", label: "Reports" },
+  { href: "/governance", label: "Governance" },
   { href: "/validators", label: "Validators" },
-  { href: "/admin", label: "Admin" },
+  { href: "/reports", label: "Registry" },
+  { href: "/my-submissions", label: "My Work" },
+  { href: "/docs", label: "Docs" },
+  { href: "/security", label: "Security" },
+  { href: "/admin", label: "Council" },
 ];
+
+import { useWeb3 } from "@/app/context/Web3Context";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { isConnected, isCorrectNetwork, switchNetwork } = useWeb3();
 
   return (
-    <div className="fixed top-6 left-0 right-0 z-50 px-4 pointer-events-none flex justify-center">
-      <nav className="glass-panel rounded-full h-14 flex items-center p-1.5 gap-2 pointer-events-auto shadow-2xl shadow-indigo-500/10 max-w-[calc(100vw-2rem)] overflow-hidden">
+    <div className="fixed top-6 left-0 right-0 z-50 px-4 pointer-events-none flex justify-center flex-col items-center gap-4">
+      {isConnected && !isCorrectNetwork && (
+        <button 
+          onClick={switchNetwork}
+          className="pointer-events-auto bg-red-500/90 hover:bg-red-600 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl animate-in slide-in-from-top-4"
+        >
+          🚨 Wrong Network: Click to Switch to Localhost
+        </button>
+      )}
+      <nav className="glass-panel rounded-full h-14 flex items-center p-1.5 gap-2 pointer-events-auto border-brand-border/20 shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-500/20 max-w-[calc(100vw-2rem)] overflow-hidden bg-[var(--brand-nav)]">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/5 transition-all group shrink-0">
           <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-accent to-indigo-600 flex items-center justify-center text-xs font-black text-white shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform">
             V5
           </div>
-          <span className="font-display font-bold text-sm tracking-widest uppercase text-white hidden sm:block">Protocol</span>
+          <span className="font-display font-bold text-sm tracking-widest uppercase text-[var(--brand-text)] hidden sm:block">Protocol</span>
         </Link>
 
         <div className="h-6 w-px bg-white/10 mx-1 shrink-0" />
@@ -45,8 +59,8 @@ export default function Navbar() {
                 className={cn(
                   "relative rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-300 whitespace-nowrap shrink-0",
                   active 
-                    ? "text-white bg-white/10 shadow-inner" 
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "text-brand-accent bg-brand-accent/10 shadow-inner" 
+                    : "text-brand-muted hover:text-brand-text hover:bg-brand-border/50"
                 )}
               >
                 {link.label}
@@ -71,7 +85,8 @@ export default function Navbar() {
         <div className="h-6 w-px bg-white/10 mx-1 shrink-0" />
 
         {/* Right Section */}
-        <div className="px-1 shrink-0">
+        <div className="px-1 shrink-0 flex items-center gap-2">
+          <ThemeToggle />
           <WalletButton />
         </div>
       </nav>

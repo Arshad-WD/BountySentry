@@ -10,7 +10,10 @@ import { Skeleton } from "@/app/components/Skeleton";
 import { handleTxError } from "@/lib/errors";
 import { MockIPFS } from "@/lib/storage";
 
+import { useToast } from "@/app/context/ToastContext";
+
 export default function ReportDetails() {
+  const { addToast } = useToast();
   const { id } = useParams();
   const { signer, provider, isConnected, connect } = useWeb3();
   const [loading, setLoading] = useState(false);
@@ -43,14 +46,17 @@ export default function ReportDetails() {
   }, [id, provider]);
 
   const handleVote = async (approve: boolean) => {
-    if (!signer) return alert("Authorize access first.");
+    if (!signer) {
+        addToast("Authorize access first.", "warning");
+        return;
+    }
     setLoading(true);
     try {
       const tx = await validateReport(signer, Number(id), approve);
       await tx.wait();
-      alert("Vote recorded in global consensus.");
+      addToast("Vote recorded in global consensus.", "success");
     } catch (err) {
-      handleTxError(err, "Validation failure");
+      handleTxError(err, "Validation failure", addToast);
     } finally {
       setLoading(false);
     }

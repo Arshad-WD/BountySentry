@@ -5,9 +5,10 @@ import { cn } from "@/lib/cn";
 interface BadgeProps {
   children: React.ReactNode;
   variant?: "success" | "danger" | "warning" | "neutral";
+  className?: string;
 }
 
-export default function Badge({ children, variant = "neutral" }: BadgeProps) {
+export default function Badge({ children, variant = "neutral", className }: BadgeProps) {
   const variants = {
     success: "bg-green-500/10 text-green-600 border-green-500/20",
     danger: "bg-red-500/10 text-red-600 border-red-500/20",

@@ -374,8 +374,8 @@
         "Counter"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\contracts\\BountyRegistry.sol": {
-      "lastModificationDate": 1770810017954,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\contracts\\BountyRegistry.sol": {
+      "lastModificationDate": 1770827547817,
       "contentHash": "5d7123fd3f38a3b3c573876475e53699",
       "sourceName": "contracts/BountyRegistry.sol",
       "solcConfig": {
@@ -410,8 +410,8 @@
         "BountyRegistry"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\contracts\\BountyVault.sol": {
-      "lastModificationDate": 1770810017954,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\contracts\\BountyVault.sol": {
+      "lastModificationDate": 1770827547817,
       "contentHash": "9f79e8343ac5d76f54b2b132a0408819",
       "sourceName": "contracts/BountyVault.sol",
       "solcConfig": {
@@ -450,8 +450,8 @@
         "BountyVault"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\contracts\\interfaces\\IBountyVault.sol": {
-      "lastModificationDate": 1770810017956,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\contracts\\interfaces\\IBountyVault.sol": {
+      "lastModificationDate": 1770827547819,
       "contentHash": "745ee9237e7d1700acbc7a3404cd3f4b",
       "sourceName": "contracts/interfaces/IBountyVault.sol",
       "solcConfig": {
@@ -486,8 +486,44 @@
         "IBountyVault"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
-      "lastModificationDate": 1770810021751,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
+      "lastModificationDate": 1770827551612,
+      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
+      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
+      "lastModificationDate": 1770827551259,
       "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
       "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
       "solcConfig": {
@@ -524,44 +560,8 @@
         "Ownable"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
-      "lastModificationDate": 1770810023696,
-      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
-      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-      "solcConfig": {
-        "version": "0.8.28",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ReentrancyGuard"
-      ]
-    },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
-      "lastModificationDate": 1770810023691,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+      "lastModificationDate": 1770827551608,
       "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
@@ -596,8 +596,8 @@
         "Context"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\contracts\\ValidatorReputation.sol": {
-      "lastModificationDate": 1770810017954,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\contracts\\ValidatorReputation.sol": {
+      "lastModificationDate": 1770827547818,
       "contentHash": "59ddbca87c1f3164624dbdb38c523145",
       "sourceName": "contracts/ValidatorReputation.sol",
       "solcConfig": {
@@ -635,8 +635,8 @@
         "ValidatorReputation"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\contracts\\interfaces\\IReputation.sol": {
-      "lastModificationDate": 1770810017956,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\contracts\\interfaces\\IReputation.sol": {
+      "lastModificationDate": 1770827547820,
       "contentHash": "f87c74f45191b915315abd28a2322802",
       "sourceName": "contracts/interfaces/IReputation.sol",
       "solcConfig": {
@@ -671,8 +671,8 @@
         "IReputation"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\contracts\\ReportRegistry.sol": {
-      "lastModificationDate": 1770810017954,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\contracts\\ReportRegistry.sol": {
+      "lastModificationDate": 1770827547818,
       "contentHash": "e72d04604b57d30bce6164602d3e3364",
       "sourceName": "contracts/ReportRegistry.sol",
       "solcConfig": {
@@ -711,8 +711,8 @@
         "ReportRegistry"
       ]
     },
-    "D:\\MAJOR PROJECT\\V5\\V5-Frontend_Backend\\DAO\\contracts\\Counter.sol": {
-      "lastModificationDate": 1770810017954,
+    "D:\\MAJOR PROJECT\\V5\\Sentinel-Contracts\\contracts\\Counter.sol": {
+      "lastModificationDate": 1770827547818,
       "contentHash": "33776a45a042a547135b36127e31fc58",
       "sourceName": "contracts/Counter.sol",
       "solcConfig": {

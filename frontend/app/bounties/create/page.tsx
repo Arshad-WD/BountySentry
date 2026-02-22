@@ -9,8 +9,11 @@ import Card from "@/app/components/Card";
 import { handleTxError } from "@/lib/errors";
 import { Currency } from "@/lib/currency";
 
+import { useToast } from "@/app/context/ToastContext";
+
 export default function CreateBounty() {
-  const { signer, isConnected, connect } = useWeb3();
+  const { addToast } = useToast();
+  const { signer, isConnected, connect, isCorrectNetwork, switchNetwork } = useWeb3();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -51,7 +54,10 @@ export default function CreateBounty() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signer) return alert("Please connect your wallet first.");
+    if (!signer) {
+        addToast("Please connect your wallet first.", "warning");
+        return;
+    }
     
     setLoading(true);
     try {
@@ -64,9 +70,10 @@ export default function CreateBounty() {
       
       console.log("Bounty created with ID:", bountyId);
       setNewBountyId(bountyId);
+      addToast("Bounty created successfully!", "success");
       setSuccess(true);
     } catch (err: any) {
-      handleTxError(err, "Bounty creation failed");
+      handleTxError(err, "Bounty creation failed", addToast);
     } finally {
       setLoading(false);
     }
@@ -324,6 +331,10 @@ export default function CreateBounty() {
             {!isConnected ? (
               <Button onClick={connect} type="button" className="w-full py-6 text-xs tracking-[0.3em] font-black uppercase shadow-2xl">
                 Connect Wallet
+              </Button>
+            ) : !isCorrectNetwork ? (
+              <Button onClick={switchNetwork} type="button" variant="danger" className="w-full py-6 text-xs tracking-[0.3em] font-black uppercase shadow-2xl">
+                Switch to Local Network
               </Button>
             ) : (
               <Button type="submit" className="w-full py-6 text-xs tracking-[0.3em] font-black uppercase shadow-2xl" loading={loading}>
