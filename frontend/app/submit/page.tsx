@@ -150,7 +150,7 @@ export default function SubmitReport() {
         fileType: formData.fileType,
         fileName: formData.fileName
       });
-      MockIPFS.save(finalHash, ipfsData);
+      await MockIPFS.save(finalHash, ipfsData);
       
       // Submit to blockchain
       const tx = await submitReport(signer, Number(selectedBounty.id), finalHash);

@@ -26,7 +26,7 @@ export default function ReportDetails() {
             const data: any = await getReport(provider, Number(id));
             
             // Try to fetch real content from MockIPFS
-            const rawContent = MockIPFS.get(data.ipfsHash);
+            const rawContent = await MockIPFS.get(data.ipfsHash);
             if (rawContent) {
                 try {
                   const parsed = JSON.parse(rawContent);
