@@ -38,6 +38,7 @@ model Scan {
   url       String
   status    String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
   findings  Finding[]
+  logs      String[]  @default([])
   userId    String?
   user      User?     @relation(fields: [userId], references: [id])
   consent   Boolean   @default(false)
