@@ -4,9 +4,22 @@ import { useWeb3 } from "@/app/context/Web3Context";
 import Button from "./Button";
 
 export default function WalletButton() {
-  const { address, connect, loading, isConnected } = useWeb3();
+  const { address, connect, loading, isConnected, isCorrectNetwork, switchNetwork } = useWeb3();
 
   if (isConnected && address) {
+    if (!isCorrectNetwork) {
+        return (
+            <Button 
+                onClick={switchNetwork} 
+                variant="danger" 
+                className="px-6 py-2 h-9 text-[10px] flex items-center gap-2"
+            >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                Switch to Local
+            </Button>
+        );
+    }
+
     return (
       <div className="flex items-center gap-3 bg-white/5 pl-4 pr-1 py-1 rounded-full border border-white/5 backdrop-blur-sm">
         <div className="text-right hidden sm:block">

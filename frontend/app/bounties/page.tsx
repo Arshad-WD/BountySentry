@@ -10,7 +10,7 @@ import { useWeb3 } from "@/app/context/Web3Context";
 import { Currency } from "@/lib/currency";
 
 export default function BountiesList() {
-  const { provider } = useWeb3();
+  const { provider, isConnected, connect } = useWeb3();
   const router = useRouter();
   const [bounties, setBounties] = useState<any[] | null>(null);
 
@@ -50,16 +50,33 @@ export default function BountiesList() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {!bounties ? (
+        {!isConnected ? (
+          <Card className="col-span-full p-20 text-center bg-white/[0.02] border-white/5 space-y-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent">
+               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+               </svg>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-xl font-black text-white uppercase tracking-tight">Access Restricted</h3>
+              <p className="text-brand-secondary text-sm max-w-md mx-auto font-medium">
+                Please connect your wallet to synchronize with the Sentinel mainnet and view active security challenges.
+              </p>
+            </div>
+            <Button onClick={connect} className="px-12 py-4 shadow-2xl">Initialize Connection</Button>
+          </Card>
+        ) : !bounties ? (
           <>
             <CardSkeleton />
             <CardSkeleton />
             <CardSkeleton />
           </>
         ) : bounties.length === 0 ? (
-          <div className="col-span-full text-center py-20">
-            <p className="text-brand-secondary text-sm font-medium">No active bounties at the moment. Check back soon!</p>
-          </div>
+          <Card className="col-span-full p-20 text-center bg-white/[0.02] border-white/5">
+            <p className="text-brand-secondary text-sm font-bold uppercase tracking-widest italic animate-pulse">
+              No active security challenges found on the current network.
+            </p>
+          </Card>
         ) : (
           bounties.map((b) => (
             <Card key={b.id} className="p-8 bg-white/[0.02] border-white/5 hover:border-brand-accent/30 transition-all duration-500 cursor-pointer group" onClick={() => router.push(`/bounties/${b.id}`)}>

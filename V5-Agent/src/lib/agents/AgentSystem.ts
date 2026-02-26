@@ -23,7 +23,7 @@ export interface VulnerabilityReasoning {
     category: string;
     issue: string;
     description: string;
-    severity: "Low" | "Medium" | "High" | "Critical";
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     evidence: string;
     remediation: string;
 }
@@ -141,7 +141,7 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             category: "A05:2021-Security Misconfiguration",
             issue: "Missing HSTS Header",
             description: "The server does not enforce HTTPS through the Strict-Transport-Security header, making it vulnerable to SSL stripping attacks.",
-            severity: "Medium",
+            severity: "MEDIUM",
             evidence: "Header 'strict-transport-security' was not found in server response.",
             remediation: "Implement HSTS by adding the 'Strict-Transport-Security' header with a long max-age (e.g., 31536000)."
         });
@@ -154,7 +154,7 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             category: "A03:2021-Injection",
             issue: "Missing Content Security Policy",
             description: "No Content Security Policy (CSP) is implemented. This increases the risk of Cross-Site Scripting (XSS) and Clickjacking.",
-            severity: "High",
+            severity: "HIGH",
             evidence: "Header 'content-security-policy' was not found.",
             remediation: "Define a strict CSP to restrict where scripts and other resources can be loaded from."
         });
@@ -167,7 +167,7 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             category: "A01:2021-Broken Access Control",
             issue: "Server Version Disclosure",
             description: "The 'Server' header reveals specific version information about the underlying infrastructure.",
-            severity: "Low",
+            severity: "LOW",
             evidence: `Server: ${h['server']}`,
             remediation: "Configure the server to omit or genericize the 'Server' header to prevent fingerprinting."
         });
@@ -180,7 +180,7 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             category: "A05:2021-Security Misconfiguration",
             issue: "Git Configuration Exposure",
             description: "The .git configuration file is accessible. This can lead to full source code disclosure and exposure of development history.",
-            severity: "Critical",
+            severity: "CRITICAL",
             evidence: "/.git/config is accessible.",
             remediation: "Immediately restrict access to the .git directory via server configuration or remove it from the web root."
         });
@@ -194,7 +194,7 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
                 category: "A03:2021-Injection",
                 issue: secret.includes("IP") ? "Internal IP Disclosure" : "Potential API Key Exposure",
                 description: `A pattern matching sensitive information (${secret.includes("IP") ? "Internal IP" : "API Token"}) was discovered in the public HTML source.`,
-                severity: secret.includes("Key") ? "Critical" : "Medium",
+                severity: secret.includes("Key") ? "CRITICAL" : "MEDIUM",
                 evidence: secret,
                 remediation: "Immediately sanitize the public-facing HTML. Move sensitive keys to backend environment variables and ensure internal IP addresses are not leaked in comments or scripts."
             });
@@ -211,10 +211,10 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             Headers: ${JSON.stringify(recon.serverHeaders)}
             Secrets Found: ${JSON.stringify(recon.secretsFound)}
             
-            Identify 1-2 sophisticated or contextual vulnerabilities based on this stack.
+            Identify 3-5 sophisticated or contextual vulnerabilities based on this stack. Look for logical flaws, missing security headers, or insecure coding patterns.
             Return results ONLY as a JSON array of objects with these fields:
             issue, category, description, severity (Low/Medium/High/Critical), evidence, remediation.
-            Do not include any conversational text.
+            Do not include any conversational text. Be exhaustive.
         `;
 
         const llmResponse = await callLlmIntelligence(prompt, llmConfig);
@@ -288,8 +288,15 @@ export async function performRepoRecon(target: string): Promise<RepoReconResult>
             ".env",
             "docker-compose.yml",
             "package.json",
-            "Dockerfile",
-            "README.md"
+            "README.md",
+            "server.js",
+            "app.js",
+            "index.js",
+            "src/index.js",
+            "src/app.js",
+            "prisma/schema.prisma",
+            "config/default.json",
+            "settings.py"
         ];
 
         const probePromises = filesToCheck.map(async (file) => {
@@ -331,7 +338,7 @@ export async function reasonRepoVulnerabilities(recon: RepoReconResult, llmConfi
             category: "A05:2021-Security Misconfiguration",
             issue: "Exposed Environment File",
             description: "A .env file was discovered in the repository root. This often contains sensitive credentials, API keys, and database passwords.",
-            severity: "Critical",
+            severity: "CRITICAL",
             evidence: "Accessible at repo root via raw.githubusercontent.com",
             remediation: "Immediately remove the .env file from the repository and add it to .gitignore. Rotate any exposed credentials."
         });
@@ -343,7 +350,7 @@ export async function reasonRepoVulnerabilities(recon: RepoReconResult, llmConfi
             category: "A01:2021-Broken Access Control",
             issue: "Exposed Infrastructure Config",
             description: "A docker-compose file is exposed. This reveals internal network topology and service configurations.",
-            severity: "Medium",
+            severity: "MEDIUM",
             evidence: "docker-compose.yml detected in root.",
             remediation: "Ensure infrastructure manifests are not stored in public repositories or are appropriately sanitized."
         });
@@ -359,10 +366,15 @@ export async function reasonRepoVulnerabilities(recon: RepoReconResult, llmConfi
             Tech Stack: ${recon.techStack.join(", ")}
             Risk Score: ${recon.riskScore}
             
-            Identify potential architecture or configuration flaws specific to this repository structure.
+            Identify at least 3-5 potential architecture or configuration flaws specific to this repository structure. Look for:
+            1. Insecure database configurations (Prisma, etc.)
+            2. Missing security middleware.
+            3. Hardcoded secrets in non-.env files.
+            4. Potential command injection or insecure file handling.
+
             Return results ONLY as a JSON array of objects with these fields:
             issue, category, description, severity (Low/Medium/High/Critical), evidence, remediation.
-            Do not include any conversational text.
+            Do not include any conversational text. Be precise and technical.
         `;
 
         const llmResponse = await callLlmIntelligence(prompt, llmConfig);
@@ -436,9 +448,41 @@ export async function callLlmIntelligence(prompt: string, config: { provider: st
     return result;
 }
 
+/**
+ * Smart API Key Auto-Detection
+ * Detects the LLM provider from the key format
+ */
+export function detectProviderFromKey(key: string): string | null {
+    if (!key || key.trim().length === 0) return null;
+    const k = key.trim();
+
+    // Anthropic: sk-ant-... (must check before generic sk-)
+    if (k.startsWith("sk-ant-")) return "anthropic";
+
+    // OpenRouter: sk-or-... (must check before generic sk-)
+    if (k.startsWith("sk-or-")) return "openrouter";
+
+    // OpenAI: sk-... or sk-proj-...
+    if (k.startsWith("sk-")) return "openai";
+
+    // Groq: gsk_...
+    if (k.startsWith("gsk_")) return "groq";
+
+    // Ollama: localhost URLs
+    if (k.startsWith("http://localhost") || k.startsWith("http://127.0.0.1")) return "ollama";
+
+    // Google Gemini: starts with AI or is 39+ chars alphanumeric
+    if (k.startsWith("AI") && k.length >= 35) return "google";
+
+    // Mistral: length pattern
+    if (k.length === 32 && /^[a-zA-Z0-9]+$/.test(k)) return "mistral";
+
+    return null; // Unknown — let user select manually
+}
+
 // Low-level execution logic
 async function executeLlmRequest(provider: string, key: string, prompt: string) {
-    const systemPrompt = "You are a specialized cybersecurity reasoning agent. Analyze the provided reconnaissance data and return specific security vulnerabilities found. Focus on high-impact, actionable findings.";
+    const systemPrompt = "You are a specialized Senior Cybersecurity Auditor, Pentesting Lead, and zero-day researcher. Your mission is to find multiple vulnerabilities in the provided reconnaissance data. You are extremely thorough and skeptical. You analyze logic, architecture, dependency chains, and common pitfalls deeply. You MUST find at least 5-8 distinct security issues if possible, ranging from Low to Critical. For every finding, you must provide a detailed mitigation strategy. Return only high-impact technical findings.";
 
     try {
         if (provider === "openai") {
@@ -532,6 +576,52 @@ async function executeLlmRequest(provider: string, key: string, prompt: string) 
                 })
             });
             return await res.json();
+        }
+
+        if (provider === "mistral") {
+            const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${key}`
+                },
+                body: JSON.stringify({
+                    model: "mistral-large-latest",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: prompt }
+                    ]
+                })
+            });
+            const data = await res.json();
+            if (data.error) return { error: true, details: data.error };
+            return data;
+        }
+
+        if (provider === "sentinelx" || provider === "shannon") {
+            // SentinelX / Shannon - OpenAI-compatible API for autonomous pentesting
+            // Shannon exposes an OpenAI-compatible endpoint
+            const shannonBase = key.startsWith("http") ? key : "https://api.shannon.ai";
+            const apiKey = key.startsWith("http") ? "" : key;
+
+            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
+            const res = await fetch(`${shannonBase}/v1/chat/completions`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    model: "shannon-security",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.1
+                })
+            });
+            const data = await res.json();
+            if (data.error) return { error: true, details: data.error };
+            return data;
         }
 
     } catch (e) {

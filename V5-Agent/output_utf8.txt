@@ -1,0 +1,25 @@
+﻿--- Prisma Initialization Test ---
+DATABASE_URL present: true
+Attempting new PrismaClient()...
+Failed: new PrismaClient(): `PrismaClient` needs to be constructed with a non-empty, valid `PrismaClientOptions`:
+
+```
+new PrismaClient({
+  ...
+})
+```
+
+or
+
+```
+constructor() {
+  super({ ... });
+}
+```
+          
+Attempting new PrismaClient({ datasourceUrl: ... })...
+Failed: new PrismaClient({ datasourceUrl: ... }): Unknown property datasourceUrl provided to PrismaClient constructor.
+Read more at https://pris.ly/d/client-constructor
+Attempting new PrismaClient({ datasources: { db: { url: ... } } })...
+Failed: new PrismaClient({ datasources: { db: { url: ... } } }): Unknown property datasources provided to PrismaClient constructor.
+Read more at https://pris.ly/d/client-constructor

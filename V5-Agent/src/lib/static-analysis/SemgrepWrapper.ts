@@ -46,12 +46,12 @@ export class SemgrepWrapper implements StaticAnalyzer {
         return findings;
     }
 
-    private mapSeverity(severity: string): "Low" | "Medium" | "High" | "Critical" {
+    private mapSeverity(severity: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
         switch (severity?.toUpperCase()) {
-            case "ERROR": return "High";
-            case "WARNING": return "Medium";
-            case "INFO": return "Low";
-            default: return "Medium";
+            case "ERROR": return "HIGH";
+            case "WARNING": return "MEDIUM";
+            case "INFO": return "LOW";
+            default: return "MEDIUM";
         }
     }
 }
