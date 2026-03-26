@@ -40,7 +40,7 @@ export async function getReports(provider: any) {
     } catch { return []; }
 
     const count = await registry.reportCount();
-    const stakeRequired = await registry.VALIDATOR_STAKE();
+    const stake = await registry.VALIDATOR_STAKE();
     const reports = [];
 
     for (let i = 0; i < count; i++) {
@@ -54,7 +54,7 @@ export async function getReports(provider: any) {
             status: r[3] === BigInt(0) ? "PENDING" : r[3] === BigInt(1) ? "ACCEPTED" : "REJECTED",
             approvals: Number(r[4]),
             rejections: Number(r[5]),
-            stakeRequired: ethers.formatEther(stakeRequired),
+            stakeRequired: ethers.formatEther(stake),
             details: `Pending retrieval from IPFS: ${r[2]}`,
             summary: undefined
         });

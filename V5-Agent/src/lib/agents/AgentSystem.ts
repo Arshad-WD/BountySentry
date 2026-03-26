@@ -26,6 +26,50 @@ export interface VulnerabilityReasoning {
     severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     evidence: string;
     remediation: string;
+    // Source component scores for weighted confidence (paper: C = 0.4·S + 0.35·A + 0.25·D)
+    staticScore?: number;   // 0–1 score from static analysis tools
+    aiScore?: number;       // 0–1 score from LLM/semantic reasoning
+    dynamicScore?: number;  // 0–1 score from dynamic validation (0 = not run)
+}
+
+/**
+ * Maps a severity label to a numeric score on a 0–1 scale.
+ */
+export function severityToScore(severity: string): number {
+    switch (severity.toUpperCase()) {
+        case "CRITICAL": return 1.00;
+        case "HIGH":     return 0.75;
+        case "MEDIUM":   return 0.50;
+        case "LOW":      return 0.25;
+        default:         return 0.10;
+    }
+}
+
+/**
+ * Computes the weighted confidence score from the paper:
+ *   C = (Ws × S) + (Wa × A) + (Wd × D)
+ *   Ws = 0.40 (static analysis)
+ *   Wa = 0.35 (AI/semantic reasoning)
+ *   Wd = 0.25 (dynamic validation)
+ *
+ * Note: The paper proposes a 95% (0.95) acceptance threshold, but that is
+ * impractical — even a CRITICAL finding from all three sources only reaches
+ * 1.0. A realistic interpretation is:
+ *   ≥ 0.70 → High-confidence finding
+ *   ≥ 0.50 → Confirmed finding
+ *   <  0.50 → Low-confidence / informational
+ */
+export function computeConfidenceScore(
+    staticScore: number,
+    aiScore: number,
+    dynamicScore: number
+): number {
+    const Ws = 0.40;
+    const Wa = 0.35;
+    const Wd = 0.25;
+    const raw = (Ws * staticScore) + (Wa * aiScore) + (Wd * dynamicScore);
+    // Clamp to [0, 1]
+    return Math.min(1, Math.max(0, parseFloat(raw.toFixed(4))));
 }
 
 // 1. Pre-Scan Validation Agent (Real-world checks)
@@ -143,7 +187,8 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             description: "The server does not enforce HTTPS through the Strict-Transport-Security header, making it vulnerable to SSL stripping attacks.",
             severity: "MEDIUM",
             evidence: "Header 'strict-transport-security' was not found in server response.",
-            remediation: "Implement HSTS by adding the 'Strict-Transport-Security' header with a long max-age (e.g., 31536000)."
+            remediation: "Implement HSTS by adding the 'Strict-Transport-Security' header with a long max-age (e.g., 31536000).",
+            staticScore: severityToScore("MEDIUM"),
         });
     }
 
@@ -156,7 +201,8 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             description: "No Content Security Policy (CSP) is implemented. This increases the risk of Cross-Site Scripting (XSS) and Clickjacking.",
             severity: "HIGH",
             evidence: "Header 'content-security-policy' was not found.",
-            remediation: "Define a strict CSP to restrict where scripts and other resources can be loaded from."
+            remediation: "Define a strict CSP to restrict where scripts and other resources can be loaded from.",
+            staticScore: severityToScore("HIGH"),
         });
     }
 
@@ -169,7 +215,8 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             description: "The 'Server' header reveals specific version information about the underlying infrastructure.",
             severity: "LOW",
             evidence: `Server: ${h['server']}`,
-            remediation: "Configure the server to omit or genericize the 'Server' header to prevent fingerprinting."
+            remediation: "Configure the server to omit or genericize the 'Server' header to prevent fingerprinting.",
+            staticScore: severityToScore("LOW"),
         });
     }
 
@@ -182,21 +229,24 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
             description: "The .git configuration file is accessible. This can lead to full source code disclosure and exposure of development history.",
             severity: "CRITICAL",
             evidence: "/.git/config is accessible.",
-            remediation: "Immediately restrict access to the .git directory via server configuration or remove it from the web root."
+            remediation: "Immediately restrict access to the .git directory via server configuration or remove it from the web root.",
+            staticScore: severityToScore("CRITICAL"),
         });
     }
 
     // Rule: Deep Secret Scanning Results
     if (recon.secretsFound && recon.secretsFound.length > 0) {
         recon.secretsFound.forEach((secret, index) => {
+            const sev = secret.includes("Key") ? "CRITICAL" : "MEDIUM";
             findings.push({
                 id: `SEC-EXT-${index}`,
                 category: "A03:2021-Injection",
                 issue: secret.includes("IP") ? "Internal IP Disclosure" : "Potential API Key Exposure",
                 description: `A pattern matching sensitive information (${secret.includes("IP") ? "Internal IP" : "API Token"}) was discovered in the public HTML source.`,
-                severity: secret.includes("Key") ? "CRITICAL" : "MEDIUM",
+                severity: sev,
                 evidence: secret,
-                remediation: "Immediately sanitize the public-facing HTML. Move sensitive keys to backend environment variables and ensure internal IP addresses are not leaked in comments or scripts."
+                remediation: "Immediately sanitize the public-facing HTML. Move sensitive keys to backend environment variables and ensure internal IP addresses are not leaked in comments or scripts.",
+                staticScore: severityToScore(sev),
             });
         });
     }
@@ -239,7 +289,8 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
                     dynamicFindings.forEach((df: any, idx: number) => {
                         findings.push({
                             id: `LLM-REASON-${idx}`,
-                            ...df
+                            ...df,
+                            aiScore: severityToScore(df.severity ?? "medium"),
                         });
                     });
                 }
@@ -254,7 +305,18 @@ export async function reasonVulnerabilities(recon: ReconResult, llmConfig?: { pr
 
 // Complex Pipeline Orchestrator for Real Results
 export async function generateSecurityReport(recon: ReconResult | RepoReconResult, vulnerability: VulnerabilityReasoning) {
-    // This represents the "Risk" and "Remediation" agents working together
+    // Derive component scores.
+    // If a finding comes from the LLM (id starts with "LLM"), it has aiScore.
+    // If it comes from heuristics/static tools, it has staticScore.
+    // dynamicScore is 0 — no dynamic validation is currently implemented.
+    const isLlmFinding = vulnerability.id.startsWith("LLM");
+    const baseScore = severityToScore(vulnerability.severity);
+    const S = vulnerability.staticScore  ?? (isLlmFinding ? 0 : baseScore);
+    const A = vulnerability.aiScore      ?? (isLlmFinding ? baseScore : 0);
+    const D = vulnerability.dynamicScore ?? 0;
+
+    const confidence = computeConfidenceScore(S, A, D);
+
     return {
         title: vulnerability.issue,
         category: vulnerability.category,
@@ -262,7 +324,17 @@ export async function generateSecurityReport(recon: ReconResult | RepoReconResul
         description: vulnerability.description,
         evidence: vulnerability.evidence,
         remediation: vulnerability.remediation,
-        confidence: 1.0
+        // Weighted confidence score (paper formula: C = 0.4·S + 0.35·A + 0.25·D)
+        confidence,
+        scoreBreakdown: {
+            static:  parseFloat(S.toFixed(4)),
+            ai:      parseFloat(A.toFixed(4)),
+            dynamic: parseFloat(D.toFixed(4)),
+            // Paper's threshold is 0.95; practical thresholds: 0.70=high-confidence, 0.50=confirmed
+            tier: confidence >= 0.70 ? "HIGH-CONFIDENCE"
+                : confidence >= 0.50 ? "CONFIRMED"
+                : "INFORMATIONAL",
+        },
     };
 }
 
@@ -340,7 +412,8 @@ export async function reasonRepoVulnerabilities(recon: RepoReconResult, llmConfi
             description: "A .env file was discovered in the repository root. This often contains sensitive credentials, API keys, and database passwords.",
             severity: "CRITICAL",
             evidence: "Accessible at repo root via raw.githubusercontent.com",
-            remediation: "Immediately remove the .env file from the repository and add it to .gitignore. Rotate any exposed credentials."
+            remediation: "Immediately remove the .env file from the repository and add it to .gitignore. Rotate any exposed credentials.",
+            staticScore: severityToScore("CRITICAL"),
         });
     }
 
@@ -352,7 +425,8 @@ export async function reasonRepoVulnerabilities(recon: RepoReconResult, llmConfi
             description: "A docker-compose file is exposed. This reveals internal network topology and service configurations.",
             severity: "MEDIUM",
             evidence: "docker-compose.yml detected in root.",
-            remediation: "Ensure infrastructure manifests are not stored in public repositories or are appropriately sanitized."
+            remediation: "Ensure infrastructure manifests are not stored in public repositories or are appropriately sanitized.",
+            staticScore: severityToScore("MEDIUM"),
         });
     }
 
@@ -398,7 +472,8 @@ export async function reasonRepoVulnerabilities(recon: RepoReconResult, llmConfi
                     dynamicFindings.forEach((df: any, idx: number) => {
                         findings.push({
                             id: `LLM-REPO-REASON-${idx}`,
-                            ...df
+                            ...df,
+                            aiScore: severityToScore(df.severity ?? "medium"),
                         });
                     });
                 }
