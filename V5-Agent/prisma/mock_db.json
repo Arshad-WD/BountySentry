@@ -1,0 +1,46 @@
+{
+  "scans": [
+    {
+      "id": "mly9tfnk-ulr9dhql4ag",
+      "url": "https://memory.jenixweblancer.in/",
+      "status": "COMPLETED",
+      "consent": true,
+      "scanMode": "full",
+      "scanEngine": "codeql",
+      "logs": [
+        "Initializing Agent Mission...",
+        "Target validated. Engine: CodeQL Engine | Mode: Full",
+        "Initiating analysis pipeline...",
+        "Enabling Deep Analysis Mode. No hard time limit; performing exhaustive coverage.",
+        "Allocating high-compute secure sandbox for multi-stage recursive probing...",
+        "Phase 1: Heuristic Structural Mapping - [IN PROGRESS]",
+        "Probing Web Infrastructure headers and services...",
+        "Executing HEAD request to https://memory.jenixweblancer.in/",
+        "Infrastructure mapping complete. Analyzed 19 headers.",
+        "Scanned HTML surface for leaked secrets.",
+        "Engaging groq Intelligence for deep reasoning mission...",
+        "[Finding] Identified Missing Content Security Policy (HIGH) via Heuristics.",
+        "Analysis complete. 1 findings across full analysis.",
+        "Persistence synchronized. Mission Success."
+      ],
+      "vulnCount": 1,
+      "createdAt": "2026-02-22T21:39:39.009Z",
+      "updatedAt": "2026-02-22T21:39:41.449Z"
+    }
+  ],
+  "findings": [
+    {
+      "id": "mly9thjb-j14ig415n8f",
+      "scanId": "mly9tfnk-ulr9dhql4ag",
+      "type": "Missing Content Security Policy",
+      "severity": "HIGH",
+      "description": "No Content Security Policy (CSP) is implemented. This increases the risk of Cross-Site Scripting (XSS) and Clickjacking.",
+      "evidence": "Header 'content-security-policy' was not found.",
+      "location": "A03:2021-Injection",
+      "createdAt": "2026-02-22T21:39:41.447Z"
+    }
+  ],
+  "users": [],
+  "sessions": [],
+  "vulnCount": 0
+}

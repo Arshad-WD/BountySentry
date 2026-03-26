@@ -13,12 +13,17 @@ export async function createBounty(
     const vault = new ethers.Contract(ENV.VAULT_ADDRESS, BountyVaultAbi.abi, signer);
 
     // Get the current bounty count to use as the new bounty ID
-    const bountyId = await vault.bountyCount();
-    console.log("Creating bounty with ID:", bountyId.toString());
+    const bountyCountVal = await vault.bountyCount();
+    console.log("Current Bounty Count (Next ID):", bountyCountVal.toString());
+
+    const valueWei = ethers.parseEther(rewardEth);
+    console.log("Locking Reward:", rewardEth, "ETH", "(", valueWei.toString(), "Wei )");
 
     // Create bounty with the bounty ID and ETH value
-    const tx = await vault.lockReward(bountyId, {
-        value: ethers.parseEther(rewardEth)
+    // Explicitly adding gasLimit to avoid estimation errors on local nodes
+    const tx = await vault.lockReward(bountyCountVal, {
+        value: valueWei,
+        gasLimit: 500000
     });
 
     console.log("Transaction sent:", tx.hash);
@@ -26,9 +31,9 @@ export async function createBounty(
     console.log("Transaction confirmed:", receipt.hash);
 
     // Store metadata in MockIPFS (in production, use real IPFS)
-    MockIPFS.save(`bounty-${bountyId}`, JSON.stringify({ projectName, description }));
+    await MockIPFS.save(`bounty-${bountyCountVal}`, JSON.stringify({ projectName, description }));
 
-    return { tx, receipt, bountyId: Number(bountyId) };
+    return { tx, receipt, bountyId: Number(bountyCountVal) };
 }
 
 export async function getBountyReward(provider: Provider, bountyId: number) {
@@ -66,7 +71,7 @@ export async function getBounties(provider: any) {
             let description = "";
 
             try {
-                const metadata = MockIPFS.get(`bounty-${i}`);
+                const metadata = await MockIPFS.get(`bounty-${i}`);
                 if (metadata) {
                     const parsed = JSON.parse(metadata);
                     projectName = parsed.projectName || projectName;
@@ -102,7 +107,7 @@ export async function getBounty(provider: any, bountyId: number) {
     let description = "This authorized security challenge is governed by the V5 Decentralized DAO.";
 
     try {
-        const metadata = MockIPFS.get(`bounty-${bountyId}`);
+        const metadata = await MockIPFS.get(`bounty-${bountyId}`);
         if (metadata) {
             const parsed = JSON.parse(metadata);
             projectName = parsed.projectName || projectName;

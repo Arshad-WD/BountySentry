@@ -51,7 +51,7 @@ export async function getReports(provider: any) {
             projectName: `Discovered Protocol #${r[0]}`,
             reporter: r[1],
             ipfsHash: r[2],
-            status: r[3] === 0 ? "PENDING" : r[3] === 1 ? "ACCEPTED" : "REJECTED",
+            status: r[3] === BigInt(0) ? "PENDING" : r[3] === BigInt(1) ? "ACCEPTED" : "REJECTED",
             approvals: Number(r[4]),
             rejections: Number(r[5]),
             stakeRequired: ethers.formatEther(stake),
@@ -82,11 +82,11 @@ export async function getReport(provider: any, reportId: number) {
         projectName: `Discovered Protocol #${r[0]}`,
         reporter: r[1],
         ipfsHash: r[2],
-        status: r[3] === 0 ? "PENDING" : r[3] === 1 ? "ACCEPTED" : "REJECTED",
+        status: r[3] === BigInt(0) ? "PENDING" : r[3] === BigInt(1) ? "ACCEPTED" : "REJECTED",
         approvals: Number(r[4]),
         rejections: Number(r[5]),
         stakeRequired: ethers.formatEther(stake),
-        details: `Full technical report is cryptographically stored on IPFS.\\nHash: ${r[2]}`,
+        details: `Full technical report is cryptographically stored on IPFS.\nHash: ${r[2]}`,
         summary: undefined // Will be populated from MockIPFS if available
     };
 }
